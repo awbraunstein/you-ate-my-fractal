@@ -1,0 +1,40 @@
+#+TITLE:     You ate my fractal
+#+AUTHOR:    Andrew Braunstein
+#+EMAIL:     bandrew@seas.upenn.edu
+#+DATE:      2012-11-16 Fri
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+
+* Fractals?
+  Yes, this will be a parameterized fractal generator and zoomer. It
+  will also be written in haskell(WOOOOOOT).
+
+* How will recursion be used?
+  Even though much of the code will not be recursive, the coloring of
+  the fractals as well as computing the points will be done
+  recursively. Also, I believe that I will discover more about the
+  nature of recursion and how it relates to art and mathematical
+  functions.
+
+* Goals
+  - A zoomer that will explore the Mandelbrot sets and the Julia
+    Sets(if I have time)
+  - Using the GPU (GPipe) I will create beautifully rendered recursive
+    art.
+  - The fractals will be generated using input from the user. 
+    - iterations
+    - x-dimension
+    - y-dimension
+    - pixels
+    - color scheme
+    - max recursion depth
+  - Beautiful images and flyovers that my mother would be proud to put
+    on the fridge
+
