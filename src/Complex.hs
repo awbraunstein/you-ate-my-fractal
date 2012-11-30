@@ -24,6 +24,3 @@ im (C x y) = y
 
 magnitude :: Complex -> Float
 magnitude = real . abs
-
-dot :: Complex -> Float
-dot (C x y) = x * x + y * y

@@ -36,9 +36,10 @@ drawFractal frac =
       vertex $ Vertex3 x y 0
 
 getPixelValues :: Fractal -> [(GLfloat,GLfloat,Color3 GLfloat)]
-getPixelValues frac = [ (x/width, y/height, colorFromValue $ frac (realToFrac x) (realToFrac y)) |
-                  x <- [-width..width],
-                  y <- [-height..height]]
+getPixelValues frac =
+  [ (x/width, y/height, colorFromValue $ frac (realToFrac x) (realToFrac y)) |
+                  x <- [-width..width], -- Chooses whole numbers
+                  y <- [-height..height]] -- Change this part to use the QTree
 
 colorFromValue :: Int -> Color3 GLfloat
 colorFromValue n = Color3 (t n) (t (n+5)) (t (n+10))
