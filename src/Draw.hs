@@ -1,17 +1,16 @@
-
 module Draw where
 
-import Graphics.Rendering.OpenGL
-import Graphics.UI.GLUT
+import Graphics.Rendering.OpenGL hiding (Color)
+import Graphics.UI.GLUT hiding (Color)
 import Fractal
 import QTree
 
 
 width :: GLfloat
-width = 320
+width = 640
 
 height :: GLfloat
-height = 320
+height = 640
 
 draw :: Fractal -> IO ()
 draw frac = do
@@ -37,12 +36,9 @@ drawFractal frac =
 
 getPixelValues :: Fractal -> [(GLfloat,GLfloat,Color3 GLfloat)]
 getPixelValues frac =
-  [ (x/width, y/height, colorFromValue $ frac (realToFrac x) (realToFrac y)) |
+  [ (x/width, y/height, toColor3 $ frac (realToFrac x) (realToFrac y)) |
                   x <- [-width..width], -- Chooses whole numbers
                   y <- [-height..height]] -- Change this part to use the QTree
 
-colorFromValue :: Int -> Color3 GLfloat
-colorFromValue n = Color3 (t n) (t (n+5)) (t (n+10))
-  where
-      t :: Int -> GLfloat
-      t i = 0.5 + 0.5*cos( fromIntegral i / 10 )
+toColor3 :: Color -> Color3 GLfloat
+toColor3 (Color r g b) = Color3 (realToFrac r) (realToFrac g) (realToFrac b)

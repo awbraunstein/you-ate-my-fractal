@@ -11,6 +11,15 @@ instance Num Complex where
     (C x y) + (C z t) = C (x+z) ( y+t)
     abs (C x y)       = C (sqrt (x*x + y*y)) 0.0
     signum (C x y)    = C (signum x) 0.0
+    negate (C x y)    = C (negate x) (negate y)
+
+instance Fractional Complex where
+  (C x y) / (C x' y')   =  C ((x*x''+y*y'') / d) ((y*x''-x*y'') / d)
+                           where x'' = scaleFloat k x'
+                                 y'' = scaleFloat k y'
+                                 k   = - max (exponent x') (exponent y')
+                                 d   = x'*x'' + y'*y''
+  fromRational a      =  C (fromRational a) 0
 
 -- Probably unnecessary
 complex :: Float -> Float -> Complex
