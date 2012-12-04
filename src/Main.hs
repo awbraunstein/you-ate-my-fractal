@@ -3,15 +3,15 @@ module Main where
 import Draw
 import Complex
 import Fractal
+import QTree
+import Data.Maybe
 
 maxIteration :: Int
-maxIteration = 100
+maxIteration = 80
 
 -- Pixel -> Pixel -> Iteration(color)
 mandel :: Fractal
-mandel x y = colorFromValue $ f (C r i) 0 maxIteration where
-  r = 2.5 * x / (realToFrac width)
-  i = 2.0 * y / (realToFrac height)
+mandel x y = colorFromValue $ f (C x y) 0 maxIteration where
   f :: Complex -> Complex -> Int -> Int
   f _ _ 0 = 0
   f c z i
@@ -23,9 +23,7 @@ c :: Complex
 c = C (-0.423) 0.745
 
 julia :: Fractal
-julia x y = colorFromValue $ f c (C r i) 0 where
-  r = 1.5 * x / (realToFrac width)
-  i = 1.5 * y / (realToFrac height)
+julia x y = colorFromValue $ f c (C x y) 0 where
   f c z iter
     | iter > maxIteration = 0
     | otherwise = let z' = z^2 + c in
@@ -34,9 +32,7 @@ julia x y = colorFromValue $ f c (C r i) 0 where
                   else f c z' (iter+1)
 
 ship :: Fractal
-ship x y = colorFromValue $ f (C r i) 0 0 where
-  r = 2 * x / (realToFrac width)
-  i = 2 * y / (realToFrac height)
+ship x y = colorFromValue $ f (C x y) 0 0 where
   f c z iter
     | iter > maxIteration = 0
     | otherwise = let z' = (C (magnitude z) (abs(im z)))^2 + c in
@@ -53,14 +49,19 @@ it z = 3 * z^4 - 1
 dx z = 12 * ( z^3)
 
 newton :: Fractal
-newton x y = colorFromValue $ f (C r i) 0 where
-  r = 2 * x / (realToFrac width)
-  i = 2 * y / (realToFrac height)
+newton x y = colorFromValue $ f (C x y) 0 where
   f z iter
     | iter > maxIteration = 0
     | ( abs $ magnitude l - magnitude z) > minDiff = f l (iter + 1)
     | otherwise = iter
     where l = z - it z / dx z
+
+test :: Fractal
+test x y
+  | x <= 0 && y >= 0 = Color 1 0 1
+  | x <= 0 && y < 0 = Color 0 1 0
+  | x > 0 && y >= 0 = Color 0 0 1
+  | x > 0 && y < 0 = Color 1 0 0
 
 colorFromValue :: Colorize
 colorFromValue n = Color (t n) (t (n+5)) (t (n+10))
@@ -73,5 +74,7 @@ colorFromValue' x
     | x > maxIteration = Color 255 255 255
     | otherwise = Color (realToFrac x) (realToFrac x) (realToFrac x)
 
+testTree = mkColorQTree test (Q (-1) 1 1 (-1))
+
 main :: IO ()
-main = draw $ newton
+main = draw mandel (Q (-2.5) 2 2.5 (-2))

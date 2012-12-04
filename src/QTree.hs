@@ -3,13 +3,19 @@ module QTree where
 import Control.Monad
 
 data Quad a = Q a a a a
+              deriving (Show)
 
 type Neighbor a = QTree a
 
 type Range = Quad Float
 
+data Child = UL | UR | LR | LL | ROOT
+    deriving (Show)
+
 data QTree a = Branch a (Quad (QTree a)) (Quad (Neighbor a)) Range
              | Empty
+               deriving (Show)
+
 
 range :: QTree a -> Maybe Range
 range (Branch _ _ _ r) = Just r
@@ -18,17 +24,17 @@ range Empty = Nothing
 bound :: (Quad Float -> Float) -> QTree a -> Maybe Float
 bound fn = liftM fn . range
 
-ulBound :: QTree a -> Maybe Float
-ulBound = bound ul
+x1Bound :: QTree a -> Maybe Float
+x1Bound = bound ul
 
-urBound :: QTree a -> Maybe Float
-urBound = bound ur
+x2Bound :: QTree a -> Maybe Float
+x2Bound = bound lr
 
-lrBound :: QTree a -> Maybe Float
-lrBound = bound lr
+y1Bound :: QTree a -> Maybe Float
+y1Bound = bound ur
 
-llBound :: QTree a -> Maybe Float
-llBound = bound ll
+y2Bound :: QTree a -> Maybe Float
+y2Bound = bound ll
 
 children :: QTree a -> Maybe (Quad (QTree a))
 children (Branch _ q _ _) = Just q
@@ -49,9 +55,34 @@ lrC = child lr
 llC :: QTree a -> Maybe (QTree a)
 llC = child ll
 
+nodeVal :: QTree a -> Maybe a
+nodeVal Empty = Nothing
+nodeVal (Branch v _ _ _) = Just v
+
+midpoint :: Range -> (Float, Float)
+midpoint (Q x1 y1 x2 y2) = ((x2 + x1)/2, (y2 + y1)/2)
+
+ulQ :: Range -> Range
+ulQ r@(Q x1 y1 _ _) = (Q x1 y1 mx my) where
+  (mx, my) = midpoint r
+
+urQ :: Range -> Range
+urQ r@(Q _ y1 x2 _) = (Q mx y1 x2 my) where
+  (mx, my) = midpoint r
+
+lrQ :: Range -> Range
+lrQ r@(Q _ _ x2 y2) = (Q mx my x2 y2) where
+  (mx, my) = midpoint r
+
+llQ :: Range -> Range
+llQ r@(Q x1 _ _ y2) = (Q x1 my mx y2) where
+  (mx, my) = midpoint r
+
 neighbors :: QTree a -> Maybe (Quad (Neighbor a))
 neighbors (Branch _ _ n _) = Just n
 neighbors Empty = Nothing
+
+emptyQ = (Q Empty Empty Empty Empty)
 
 neighbor :: (Quad (Neighbor a) -> Neighbor a) -> QTree a -> Maybe (Neighbor a)
 neighbor fn = liftM fn . neighbors
