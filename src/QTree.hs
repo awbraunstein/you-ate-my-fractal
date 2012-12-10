@@ -99,6 +99,9 @@ rightN = neighbor right
 bottomN :: QTree a -> Maybe (Neighbor a)
 bottomN = neighbor bottom
 
+intersect :: Range -> Range -> Bool
+intersect (Q x1a y1a x2a y2a) (Q x1b y1b x2b y2b) =
+  (x1a <= x2b && x2a >= x1b && y1a >= y2b && y2a <= y1b)
 
 
 -- Utilities for acting on Quads. Avoid calling these directly

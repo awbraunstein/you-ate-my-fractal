@@ -7,7 +7,7 @@ import QTree
 import Data.Maybe
 
 maxIteration :: Int
-maxIteration = 80
+maxIteration = 100
 
 -- Pixel -> Pixel -> Iteration(color)
 mandel :: Fractal
@@ -77,4 +77,4 @@ colorFromValue' x
 testTree = mkColorQTree test (Q (-1) 1 1 (-1))
 
 main :: IO ()
-main = draw mandel (Q (-2.5) 2 2.5 (-2))
+main = draw newton $ Q (-2) 2 2 (-2) -- Q (-1.2579957) 0.9356985 (-0.5415778) 0.11086464

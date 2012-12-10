@@ -9,29 +9,62 @@ import QTree
 
 
 draw :: Fractal -> Range -> IO ()
-draw frac rng = do
+draw frac rngi = do
   (progname,_) <- getArgsAndInitialize
   initialDisplayMode $= [DoubleBuffered]
   createWindow "You ate my fractal"
-  let tree = mkColorQTree frac rng
+  let tree = mkColorQTree frac rngi
+  rng' <- newIORef (rngi :: Range)
+  rangeStart <- newIORef ((0.0,0.0) :: (Float, Float))
   res <- newIORef (3 :: Int)
   reshapeCallback $= Just reshape
-  keyboardMouseCallback $= Just (keyboardMouse res)
+  keyboardMouseCallback $= Just (keyboardMouse res rangeStart rng' rngi)
   idleCallback $= Just idle
-  displayCallback $= display tree rng res
+  displayCallback $= display tree rng' res
   mainLoop
 
 
-keyboardMouse res key state modifiers position = do
-  keyboardAct res key state
+keyboardMouse res rangeStart rng rngi key state modifiers position = do
+  keyboardAct rng rngi res key state
+  mouseAct rangeStart rng position key state
 
-keyboardAct res (Char 'e') Down = do
+mouseAct rangeStart _ (Position x y) (MouseButton LeftButton) Down = do
+  (Size x' y') <- get windowSize
+  let x'' = (fromIntegral x) / (fromIntegral x')
+  let y'' = (fromIntegral y) / (fromIntegral y')
+  rangeStart $= (x'', y'')
+
+mouseAct rangeStart rng (Position x y) (MouseButton LeftButton) Up = do
+  (Size x' y') <- get windowSize
+  let x'' = (fromIntegral x) / (fromIntegral x')
+  let y'' = (fromIntegral y) / (fromIntegral y')
+  (sx, sy) <- get rangeStart
+  (Q x1 y1 x2 y2) <- get rng
+  if x'' > sx && y'' > sy then
+    do
+      let dx = x2 - x1 -- this code is slightly fucked
+      let dy = y1 - y2
+      let sx' = (sx * dx) + x1
+      let x''' = (x'' * dx) + x1
+      let sy' = ((1 - sy) * dy) + y2
+      let y''' = ((1 - y'') * dy) + y2
+      let newRng = (Q sx' sy' x''' y''')
+      putStrLn $ show newRng
+      rng $= newRng
+    else
+      return ()
+mouseAct _ _ _ _ _ = return ()
+
+keyboardAct _ _ res (Char 'e') Down = do
   res' <- get res
   res $= res' + 1
-keyboardAct res (Char 'd') Down = do
+keyboardAct _ _ res (Char 'd') Down = do
   res' <- get res
   res $= max (res' - 1) 0
-keyboardAct _ _ _ = return ()
+keyboardAct rng rngi res (Char 'r') Down = do
+  rng $= rngi
+  res $= 3
+keyboardAct _ _ _ _ _ = return ()
 
 reshape s@(Size w h) = do
   viewport $= (Position 0 0, s)
@@ -42,7 +75,8 @@ display tree rng res = do
   loadIdentity
   preservingMatrix $ do
     res' <- get res
-    drawFractal tree rng res'
+    rng' <- get rng
+    drawFractal tree rng' res'
   swapBuffers
 
 idle = do
@@ -62,13 +96,13 @@ toColor3 (Color r g b) = Color3 (realToFrac r) (realToFrac g) (realToFrac b)
 
 getPixelValues :: QTree Color -> Range -> Int -> IO ()
 getPixelValues tree rng res = drawAtDepth res tree rng
+                -- getStart tree
                 -- walkDown tree rng
 
 -- Scale a point in a Range to be in the range -1 1 1 -1
 scalePoint :: Range -> (Float, Float) -> (GLfloat, GLfloat)
 scalePoint (Q _ y1 x2 _) (x,y) = (realToFrac (x / sf), realToFrac (y/sf))
   where sf = max y1 x2
-
 
 
   -- [ (x/width, y/height, toColor3 $ frac (realToFrac x) (realToFrac y)) |
@@ -86,20 +120,35 @@ drawQuad (Q x1 y1 x2 y2) c rng = drawPoint (x1', y1', c) >>
 
 drawAtDepth :: Int -> QTree Color -> Range -> IO ()
 drawAtDepth 0 t rng = drawQuad (fromJust $ range t) (toColor3 $ fromMaybe (white) (nodeVal t)) rng
-drawAtDepth n t rng = (drawAtDepth (n-1) (fromJust $ ulC t) rng) >>
-                      (drawAtDepth (n-1) (fromJust $ urC t) rng) >>
-                      (drawAtDepth (n-1) (fromJust $ lrC t) rng) >>
-                      (drawAtDepth (n-1) (fromJust $ llC t) rng)
+drawAtDepth n t rng =
+  (if intersect (fromJust $ range (fromJust $ ulC t)) rng then
+     (drawAtDepth (n-1) (fromJust $ ulC t) rng)
+   else return ()) >>
+  (if intersect (fromJust $ range (fromJust $ urC t)) rng then
+     (drawAtDepth (n-1) (fromJust $ urC t) rng)
+   else return ()) >>
+  (if intersect (fromJust $ range (fromJust $ lrC t)) rng then
+     (drawAtDepth (n-1) (fromJust $ lrC t) rng)
+   else return ()) >>
+  (if intersect (fromJust $ range (fromJust $ llC t)) rng then
+     (drawAtDepth (n-1) (fromJust $ llC t) rng)
+   else return ())
 
-walkDown :: QTree Color -> Range -> [(GLfloat, GLfloat, Color3 GLfloat)]
-walkDown Empty _ = []
+walkDown :: QTree Color -> Range -> IO ()
+walkDown Empty _ = return ()
 walkDown t rng =
-  (walkRight t rng) ++ walkDown (fromMaybe Empty $ bottomN t) rng
+  if intersect (fromJust $ range t) rng then
+    ((walkRight t rng) >> walkDown (fromMaybe Empty $ bottomN t) rng)
+  else return ()
 
-walkRight :: QTree Color -> Range -> [(GLfloat, GLfloat, Color3 GLfloat)]
-walkRight Empty _ = []
+walkRight :: QTree Color -> Range -> IO ()
+walkRight Empty _ = return ()
 walkRight t rng=
-  (x, y, (toColor3 $ fromMaybe (white) (nodeVal t))) : walkRight (fromMaybe Empty $ rightN t) rng
+          if intersect (fromJust $ range t) rng then
+            (drawQuad (fromJust $ range t) (toColor3 $ fromMaybe (white) (nodeVal t)) rng
+                       >>
+            walkRight (fromMaybe Empty $ rightN t) rng)
+          else return ()
     where (x,y) = scalePoint rng (midpoint (fromJust $ range t))
 
 
