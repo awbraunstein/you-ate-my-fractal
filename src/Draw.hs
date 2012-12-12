@@ -49,7 +49,6 @@ mouseAct rangeStart rng (Position x y) (MouseButton LeftButton) Up = do
       let sy' = ((1 - sy) * dy) + y2
       let y''' = ((1 - y'') * dy) + y2
       let newRng = (Q sx' sy' x''' y''')
-      putStrLn $ show newRng
       rng $= newRng
     else
       return ()
@@ -64,6 +63,27 @@ keyboardAct _ _ res (Char 'd') Down = do
 keyboardAct rng rngi res (Char 'r') Down = do
   rng $= rngi
   res $= 3
+-- Pan Up
+keyboardAct rng (Q _ y1i _ y2i) _ (SpecialKey KeyUp) Down = do
+  (Q x1 y1 x2 y2) <- get rng
+  let ydif = y1 - y2
+  rng $= (Q x1 (min y1i (y1 + (0.2 * ydif))) x2 (min (y1i - ydif) (y2 + (0.2 * ydif))))
+-- Pan Down
+keyboardAct rng (Q _ y1i _ y2i) _ (SpecialKey KeyDown) Down = do
+  (Q x1 y1 x2 y2) <- get rng
+  let ydif = y1 - y2
+  rng $= (Q x1 (max (y2i + ydif) (y1 - (0.2 * ydif))) x2 (max y2i (y2 - (0.2 * ydif))))
+-- Pan Left
+keyboardAct rng (Q x1i _ x2i _) _ (SpecialKey KeyLeft) Down = do
+  (Q x1 y1 x2 y2) <- get rng
+  let xdif = x2 - x1
+  rng $= (Q (max x1i (x1 - (0.2 * xdif))) y1 (max (x1i + xdif) (x2 - (0.2 * xdif))) y2)
+-- Pan Right
+keyboardAct rng (Q x1i _ x2i _) _ (SpecialKey KeyRight) Down = do
+  (Q x1 y1 x2 y2) <- get rng
+  let xdif = x2 - x1
+  rng $= (Q (min (x2i - xdif) (x1 + (0.2 * xdif))) y1 (min x2i (x2 + (0.2 * xdif))) y2)
+
 keyboardAct _ _ _ _ _ = return ()
 
 reshape s@(Size w h) = do
@@ -101,8 +121,12 @@ getPixelValues tree rng res = drawAtDepth res tree rng
 
 -- Scale a point in a Range to be in the range -1 1 1 -1
 scalePoint :: Range -> (Float, Float) -> (GLfloat, GLfloat)
-scalePoint (Q _ y1 x2 _) (x,y) = (realToFrac (x / sf), realToFrac (y/sf))
-  where sf = max y1 x2
+scalePoint (Q x1 y1 x2 y2) (x,y) = (realToFrac ((normx * 2) - 1), realToFrac ((normy * 2) - 1))
+  where xdist = x2 - x1
+        ydist = y1 - y2
+        normx = (x - x1) / xdist
+        normy = (y - y2) / ydist
+
 
 
   -- [ (x/width, y/height, toColor3 $ frac (realToFrac x) (realToFrac y)) |
