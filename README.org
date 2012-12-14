@@ -1,0 +1,50 @@
+#+TITLE:     You ate my fractal
+#+AUTHOR:    Andrew Braunstein
+#+EMAIL:     awbraunstein@gmail.com
+#+DATE:      2012-12-14 Fri
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+* Overview
+  You ate my fractal is a fractal explorer. By zooming, panning, and
+  enhancing, you can explore various fractals.
+* Use
+** Running
+ Usage: you-ate-my-fractal <fractal> <depth> <x1 y1 x2 y2>,
+    fractal: mandel, newton, julia, test
+    Depth is an optional parameter,
+    Depth is recursion depth for generating the colors,
+    If Depth is ommited, the default of 100 is used,
+    The range is an optional parameters.,
+    (x1, y1) are top left,
+    (x2, y2) are bottom right,
+    if it is ommitted, (-2, 2), (2, -2) is used
+** In program commands
+  - Zoom
+    Zoom in by clicking a point and dragging down and to the left to
+    create a box around a region. That region will be what shows up on
+    the screen.
+  - Pan
+    Pan by using the arrow keys
+  - Enhance
+    Use the 'e' key
+  - Dehance
+    Use the 'd' key
+  - Reset
+    Use the 'r' key
+
+* Installation
+  #+BEGIN_SRC shell
+  cabal configure
+  cabal install
+  #+END_SRC
+
