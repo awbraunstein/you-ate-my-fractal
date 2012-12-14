@@ -19,15 +19,14 @@
   enhancing, you can explore various fractals.
 * Use
 ** Running
- Usage: you-ate-my-fractal <fractal> <depth> <x1 y1 x2 y2>, \\
-    fractal: mandel, newton, julia, test \\
-    Depth is an optional parameter, \\
-    Depth is recursion depth for generating the colors, \\
-    If Depth is ommited, the default of 100 is used, \\
-    The range is an optional parameters., \\
-    (x1, y1) are top left, \\
-    (x2, y2) are bottom right , \\
-    if it is ommitted, (-2, 2), (2, -2) is used \\
+ Usage: you-ate-my-fractal <fractal> <depth> <x1 y1 x2 y2>,
+
+ Fractal is either  mandel, newton, julia, test. Depth is recursion
+ depth for generating the colors and is optional. If Depth is ommited,
+ the default of 100 is used. The range is an optional parameters also.
+ (x1, y1) are top left, (x2, y2) are bottom right. If it is ommitted,
+ (-2, 2), (2, -2) is used.
+
 ** In program commands
   - Zoom
     Zoom in by clicking a point and dragging down and to the left to
