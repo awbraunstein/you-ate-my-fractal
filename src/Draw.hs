@@ -42,12 +42,11 @@ mouseAct rangeStart rng (Position x y) (MouseButton LeftButton) Up = do
   (Q x1 y1 x2 y2) <- get rng
   if x'' > sx && y'' > sy then
     do
-      let dx = x2 - x1 -- this code is slightly fucked
-      let dy = y1 - y2
-      let sx' = (sx * dx) + x1
-      let x''' = (x'' * dx) + x1
-      let sy' = ((1 - sy) * dy) + y2
-      let y''' = ((1 - y'') * dy) + y2
+      let d = max (x2 - x1) (y1 - y2)
+      let sx' = (sx * d) + x1
+      let x''' = (x'' * d) + x1
+      let sy' = ((1 - sy) * d) + y2
+      let y''' = ((1 - y'') * d) + y2
       let newRng = (Q sx' sy' x''' y''')
       rng $= newRng
     else

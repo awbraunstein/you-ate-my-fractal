@@ -2,7 +2,10 @@ module QTree where
 
 import Control.Monad
 
-data Quad a = Q a a a a
+data Quad a = Q{ ul :: a,
+                 ur :: a,
+                 lr :: a,
+                 ll :: a }
               deriving (Show)
 
 type Neighbor a = QTree a
@@ -99,23 +102,14 @@ rightN = neighbor right
 bottomN :: QTree a -> Maybe (Neighbor a)
 bottomN = neighbor bottom
 
+pointInRange :: (Float, Float) -> Range -> Bool
+pointInRange (x, y) (Q x1 y1 x2 y2) = x <= x2 && x >= x1 && y >= y2 && y <= y1
+
+
 intersect :: Range -> Range -> Bool
 intersect (Q x1a y1a x2a y2a) (Q x1b y1b x2b y2b) =
   (x1a <= x2b && x2a >= x1b && y1a >= y2b && y2a <= y1b)
 
-
--- Utilities for acting on Quads. Avoid calling these directly
-ul :: Quad a -> a
-ul (Q x _ _ _) = x
-
-ur :: Quad a -> a
-ur (Q _ x _ _) = x
-
-lr :: Quad a -> a
-lr (Q _ _ x _) = x
-
-ll :: Quad a -> a
-ll (Q _ _ _ x) = x
 
 top :: Quad a -> a
 top = ul

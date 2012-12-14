@@ -3,6 +3,7 @@ module Fractal where
 data Color = Color !Float !Float !Float
              deriving (Show)
 
+type ItFractal = Int -> Fractal
 type Fractal = Float -> Float -> Color
 
 type Colorize = Int -> Color
