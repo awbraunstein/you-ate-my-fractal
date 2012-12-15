@@ -38,6 +38,10 @@
  (x1, y1) are top left, (x2, y2) are bottom right. If it is ommitted,
  (-2, 2), (2, -2) is used.
 
+** Example
+#+BEGIN_SRC shell
+you-ate-my-fractal mandel 120 -2.5 2 2.5 -2
+#+END_SRC
 ** In program commands
   - Zoom
     Zoom in by clicking a point and dragging down and to the left to
